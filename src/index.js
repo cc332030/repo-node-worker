@@ -48,10 +48,11 @@ export default {
         return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
-          headers: assign(response.headers, {
-            'c-repo': repo,
-            'c-url': response.url,
-          }),
+          // headers: assign(response.headers, {
+          //   'c-repo': repo,
+          //   'c-url': response.url,
+          // }),
+          headers: response.headers
         })
       }
 
