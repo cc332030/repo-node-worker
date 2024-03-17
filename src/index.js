@@ -1,4 +1,6 @@
 
+const nodeUrl = 'https://node.c332030.com'
+
 const repos = [
 
   'https://registry.npmjs.org',
@@ -21,6 +23,9 @@ function assign(obj1, obj2) {
   return Object.assign({}, obj1, obj2)
 }
 
+const contentType = 'content-type'
+const applicationJson = 'application/json'
+
 export default {
   async fetch(request, env, ctx) {
 
@@ -32,13 +37,13 @@ export default {
       const newUrl = `${repo}${path}`
       console.debug('newUrl', newUrl)
 
-      const headers = request.headers
-      console.debug('headers', headers)
+      const requestHeaders = request.headers
+      console.debug('requestHeaders', requestHeaders)
 
       const response = await fetch(newUrl, {
         method: request.method,
         redirect: 'follow',
-        headers: headers,
+        headers: requestHeaders,
       })
       console.debug('response', response)
 
@@ -46,19 +51,29 @@ export default {
       console.debug('ok', ok)
       if(ok) {
 
-        const headers = {
+        const responseHeaders = {
           'c-repo': repo,
           'c-url': response.url,
         }
 
         for (const pair of response.headers.entries()) {
-          headers[pair[0]] = pair[1]
+          responseHeaders[pair[0].toLowerCase()] = pair[1]
         }
 
-        return new Response(response.body, {
+        let body = response.body
+
+        const responseContentType = responseHeaders[contentType]
+        console.debug('responseContentType', responseContentType)
+        if(responseContentType && applicationJson === responseContentType.toLowerCase()) {
+          console.debug('json')
+          body = await response.text()
+          body = body.replaceAll(repo, nodeUrl)
+        }
+
+        return new Response(body, {
           status: response.status,
           statusText: response.statusText,
-          headers: headers
+          headers: responseHeaders
         })
       }
 
