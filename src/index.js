@@ -45,14 +45,20 @@ export default {
       const ok = response.ok
       console.debug('ok', ok)
       if(ok) {
+
+        const headers = {
+          'c-repo': repo,
+          'c-url': response.url,
+        }
+
+        for (const pair of response.headers.entries()) {
+          headers[pair[0]] = pair[1]
+        }
+
         return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
-          // headers: assign(response.headers, {
-          //   'c-repo': repo,
-          //   'c-url': response.url,
-          // }),
-          headers: response.headers
+          headers: headers
         })
       }
 
